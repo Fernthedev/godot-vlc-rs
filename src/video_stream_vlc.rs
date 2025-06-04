@@ -1,4 +1,4 @@
-use crate::vlc::{self, libvlc_track_type_t_libvlc_track_audio};
+use crate::vlc::{self};
 use crate::vlc_instance::VLCInstance;
 use cfg_if::cfg_if;
 use core::{slice, time};
@@ -573,7 +573,7 @@ impl Media {
                 .cast();
 
             let mut inst = instance_singleton.bind_mut();
-            
+
             vlc::libvlc_media_new_callbacks(
                 inst.get_vlc_instance(),
                 Some(Self::media_open_callback),
@@ -610,11 +610,8 @@ impl Media {
                 .expect("VLCInstance not found")
                 .cast();
             let mut inst = instance_singleton.bind_mut();
-            
-            vlc::libvlc_media_new_location(
-                inst.get_vlc_instance(),
-                location.as_ptr(),
-            )
+
+            vlc::libvlc_media_new_location(inst.get_vlc_instance(), location.as_ptr())
         };
 
         Self { file, media_ptr }

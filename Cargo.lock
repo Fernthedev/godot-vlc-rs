@@ -264,7 +264,7 @@ dependencies = [
 [[package]]
 name = "libvlc-sys"
 version = "0.2.1"
-source = "git+https://github.com/Fernthedev/vlc-rs2.git#de37496b65cf58e81988e8f7165a26ab229ad738"
+source = "git+https://github.com/Fernthedev/vlc-rs2.git#4e15d8b2030421d2dc8ee544a52a9bf39f9e18ff"
 dependencies = [
  "bindgen",
  "libc",
@@ -465,7 +465,7 @@ dependencies = [
 [[package]]
 name = "vlc-rs2"
 version = "0.4.0"
-source = "git+https://github.com/Fernthedev/vlc-rs2.git#de37496b65cf58e81988e8f7165a26ab229ad738"
+source = "git+https://github.com/Fernthedev/vlc-rs2.git#4e15d8b2030421d2dc8ee544a52a9bf39f9e18ff"
 dependencies = [
  "libc",
  "libvlc-sys",
