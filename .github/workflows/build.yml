@@ -2,9 +2,8 @@ name: Build GDExtension
 
 on:
     push:
-        branches: [ main ]
     pull_request:
-        branches: [ main ]
+        branches: [ master ]
     workflow_dispatch:
 
 env:
