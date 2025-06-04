@@ -1,6 +1,7 @@
 use std::{ffi::{c_char, c_int, c_void}, ptr};
 use godot::{classes::{notify::ObjectNotification, ProjectSettings}, global::PropertyHint, prelude::*};
 use printf::printf;
+
 use crate::vlc;
 
 #[derive(GodotClass)]
@@ -67,7 +68,7 @@ impl VLCInstance {
         args: vlc::va_list,
     ) {
         let s : String = printf(fmt, args as *mut _);
-        match level {
+        match level as _ {
             vlc::libvlc_log_level_LIBVLC_NOTICE => {
                 godot_print!("LibVLC: {}", s);
             },
@@ -92,7 +93,7 @@ impl VLCInstance {
         args: vlc::va_list,
     ) {
         let s : String = printf(fmt, args as *mut _);
-        match level {
+        match level as _ {
             vlc::libvlc_log_level_LIBVLC_NOTICE => {
                 godot_print!("LibVLC: {}", s);
             },
@@ -114,7 +115,7 @@ impl VLCInstance {
         args: vlc::va_list,
     ) {
         let s : String = printf(fmt, args as *mut _);
-        match level {
+        match level as _ {
             vlc::libvlc_log_level_LIBVLC_WARNING => {
                 godot_warn!("LibVLC: {}", s);
             },
@@ -133,7 +134,7 @@ impl VLCInstance {
         args: vlc::va_list,
     ) {
         let s : String = printf(fmt, args as *mut _);
-        if level == vlc::libvlc_log_level_LIBVLC_ERROR {
+        if level as vlc::libvlc_log_level == vlc::libvlc_log_level_LIBVLC_ERROR {
             godot_error!("LibVLC: {}", s);
         }
     }

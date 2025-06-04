@@ -2,6 +2,7 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    return;
     println!("cargo:rustc-link-search=./thirdparty/vlc/lib");
     println!("cargo:rustc-link-lib=libvlc");
     println!("cargo:rustc-link-lib=libvlccore");

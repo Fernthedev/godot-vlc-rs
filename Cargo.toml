@@ -1,6 +1,6 @@
 [package]
 name = "godot-vlc"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 build = "build.rs"
 
@@ -8,8 +8,16 @@ build = "build.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-godot = {version = "0.2.4", features = ["experimental-threads", "api-4-1"]}
+godot = { version = "0.2.4", features = ["experimental-threads", "api-4-1"] }
+# vlc-rs = { version = "0.3.0" }
+vlc-rs2 = { git = "https://github.com/Fernthedev/vlc-rs2.git" }
 printf = "0.1.0"
+cfg-if = "1.0.0"
 
 [build-dependencies]
 bindgen = "0.71.1"
+
+[features]
+# we use vlc 3 by default
+default = []
+vlc4 = []

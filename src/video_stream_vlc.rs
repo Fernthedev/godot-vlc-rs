@@ -1,5 +1,6 @@
 use crate::vlc::{self, libvlc_track_type_t_libvlc_track_audio};
 use crate::vlc_instance::VLCInstance;
+use cfg_if::cfg_if;
 use core::{slice, time};
 use godot::classes::image::Format;
 use godot::classes::notify::ObjectNotification;
@@ -14,7 +15,10 @@ use std::ptr;
 use std::sync::Mutex;
 use std::thread::sleep;
 
-enum MediaType { File, Location }
+enum MediaType {
+    File,
+    Location,
+}
 
 #[derive(GodotClass)]
 #[class(base=VideoStream, init)]
@@ -31,8 +35,10 @@ impl IVideoStream for VideoStreamVLC {
             MediaType::File => {
                 let file = self.base_mut().get_file();
                 VideoStreamVLCPlayback::from_file(file)
-            },
-            MediaType::Location => VideoStreamVLCPlayback::from_location(self.base_mut().get_file())
+            }
+            MediaType::Location => {
+                VideoStreamVLCPlayback::from_location(self.base_mut().get_file())
+            }
         };
 
         playback.map(|playback| playback.upcast())
@@ -45,7 +51,7 @@ impl VideoStreamVLC {
     fn create_from_location(location: GString) -> Gd<Self> {
         let mut inst = Gd::from_init_fn(|base| Self {
             base,
-            media_type: MediaType::Location
+            media_type: MediaType::Location,
         });
         inst.bind_mut().base_mut().set_file(&location);
         inst
@@ -69,28 +75,38 @@ pub struct VideoStreamVLCPlayback {
 #[godot_api]
 impl IVideoStreamPlayback for VideoStreamVLCPlayback {
     fn stop(&mut self) {
-        unsafe {
-            vlc::libvlc_media_player_stop_async(self.player);
-        }
-        loop {
-            sleep(time::Duration::from_millis(10));
-            unsafe {
-                if vlc::libvlc_media_player_get_state(self.player)
-                    == vlc::libvlc_state_t_libvlc_Stopped
-                {
-                    break;
+        cfg_if! {
+                if #[cfg(feature = "vlc4")] {
+                unsafe {
+                    vlc::libvlc_media_player_stop_async(self.player);
+                }
+                loop {
+                    sleep(time::Duration::from_millis(10));
+                    unsafe {
+                        if vlc::libvlc_media_player_get_state(self.player)
+                            == vlc::libvlc_state_t_libvlc_Stopped
+                        {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                unsafe {
+                    vlc::libvlc_media_player_stop(self.player);
                 }
             }
         }
         self.playing = false;
     }
+
     fn play(&mut self) {
         unsafe {
             vlc::libvlc_media_player_play(self.player);
         }
+
         loop {
             sleep(time::Duration::from_millis(10));
-            if unsafe { vlc::libvlc_media_player_is_playing(self.player) } {
+            if unsafe { vlc::libvlc_media_player_is_playing(self.player) != 0 } {
                 break;
             }
         }
@@ -124,8 +140,11 @@ impl IVideoStreamPlayback for VideoStreamVLCPlayback {
     fn get_playback_position(&self) -> f64 {
         unsafe { vlc::libvlc_media_player_get_time(self.player) as f64 / 1000.0 }
     }
+
+    #[cfg(feature = "vlc4")]
     fn seek(&mut self, time: f64) {
         unsafe {
+            // returns status on vlc4
             match vlc::libvlc_media_player_set_time(self.player, (time * 1000.0) as i64, false) {
                 0 => {}
                 _ => {
@@ -134,6 +153,14 @@ impl IVideoStreamPlayback for VideoStreamVLCPlayback {
             }
         }
     }
+    #[cfg(not(feature = "vlc4"))]
+    fn seek(&mut self, time: f64) {
+        unsafe {
+            vlc::libvlc_media_player_set_time(self.player, (time * 1000.0) as i64);
+        }
+    }
+
+    #[cfg(feature = "vlc4")]
     fn set_audio_track(&mut self, idx: i32) {
         unsafe {
             let tracklist = vlc::libvlc_media_player_get_tracklist(
@@ -153,12 +180,31 @@ impl IVideoStreamPlayback for VideoStreamVLCPlayback {
             vlc::libvlc_media_tracklist_delete(tracklist);
         }
     }
+
+    #[cfg(not(feature = "vlc4"))]
+    fn set_audio_track(&mut self, idx: i32) {
+        // For VLC 3.x
+        unsafe {
+            self.audio_track = idx;
+
+            vlc::libvlc_audio_set_track(self.player, idx as i32);
+        }
+    }
+
     fn get_texture(&self) -> Option<Gd<Texture2D>> {
         let texture = unsafe { self.texture.as_ref()? };
         Some(texture.clone().upcast())
     }
     fn update(&mut self, _delta: f64) {
-        self.playing = unsafe { vlc::libvlc_media_player_is_playing(self.player) };
+        #[cfg(feature = "vlc4")]
+        {
+            self.playing = unsafe { vlc::libvlc_media_player_is_playing(self.player) };
+        }
+        #[cfg(not(feature = "vlc4"))]
+        {
+            self.playing = unsafe { vlc::libvlc_media_player_is_playing(self.player) != 0 };
+        }
+
         let audio_data = unsafe { self.audio_data.as_mut().unwrap().get_mut().unwrap() };
         if self.playing && !audio_data.paused && audio_data.frames > 0 {
             let count = audio_data.frames as usize * audio_data.channels as usize;
@@ -238,13 +284,24 @@ impl VideoStreamVLCPlayback {
             godot_error!("godot-vlc: unable to create media");
             return None;
         }
-        let mut instance_singleton: Gd<VLCInstance> = Engine::singleton()
-            .get_singleton("VLCInstance")
-            .expect("VLCInstance not found")
-            .cast();
-        let inst = instance_singleton.bind_mut().get_vlc_instance();
-        let player =
-            unsafe { vlc::libvlc_media_player_new_from_media(inst, media.get_media_ptr()) };
+
+        let player = {
+            #[cfg(feature = "vlc4")]
+            {
+                let mut instance_singleton: Gd<VLCInstance> = Engine::singleton()
+                    .get_singleton("VLCInstance")
+                    .expect("VLCInstance not found")
+                    .cast();
+
+                let inst = instance_singleton.bind_mut().get_vlc_instance();
+
+                unsafe { vlc::libvlc_media_player_new_from_media(inst, media.get_media_ptr()) }
+            }
+            #[cfg(not(feature = "vlc4"))]
+            {
+                unsafe { vlc::libvlc_media_player_new_from_media(media.get_media_ptr()) }
+            }
+        };
         let texture = Box::into_raw(Box::new(ImageTexture::new_gd()));
         let audio_data = AudioData {
             buffer: vec![0f32; 0],
@@ -288,14 +345,33 @@ impl VideoStreamVLCPlayback {
             if result == 0 {
                 loop {
                     sleep(time::Duration::from_millis(10));
-                    if vlc::libvlc_media_player_is_playing(player) {
-                        break;
+
+                    #[cfg(feature = "vlc4")]
+                    {
+                        if vlc::libvlc_media_player_is_playing(player) {
+                            break;
+                        }
+                    }
+                    #[cfg(not(feature = "vlc4"))]
+                    {
+                        if vlc::libvlc_media_player_is_playing(player) != 0 {
+                            break;
+                        }
                     }
                 }
             }
 
             sleep(time::Duration::from_millis(100));
-            vlc::libvlc_media_player_stop_async(player);
+
+            #[cfg(feature = "vlc4")]
+            {
+                vlc::libvlc_media_player_stop_async(player);
+            }
+            #[cfg(not(feature = "vlc4"))]
+            {
+                vlc::libvlc_media_player_stop(player);
+            }
+
             vlc::libvlc_media_player_pause(player);
         }
         Some(Gd::from_init_fn(|base| Self {
@@ -477,6 +553,8 @@ pub struct Media {
 impl Media {
     pub fn from_file(file: GFile) -> Self {
         let file = Box::into_raw(Box::new(file));
+
+        #[cfg(feature = "vlc4")]
         let media_ptr = unsafe {
             vlc::libvlc_media_new_callbacks(
                 Some(Self::media_open_callback),
@@ -486,6 +564,26 @@ impl Media {
                 file as *mut c_void,
             )
         };
+
+        #[cfg(not(feature = "vlc4"))]
+        let media_ptr = unsafe {
+            let mut instance_singleton: Gd<VLCInstance> = Engine::singleton()
+                .get_singleton("VLCInstance")
+                .expect("VLCInstance not found")
+                .cast();
+
+            let mut inst = instance_singleton.bind_mut();
+            
+            vlc::libvlc_media_new_callbacks(
+                inst.get_vlc_instance(),
+                Some(Self::media_open_callback),
+                Some(Self::media_read_callback),
+                Some(Self::media_seek_callback),
+                None,
+                file as *mut c_void,
+            )
+        };
+
         Self { file, media_ptr }
     }
 
@@ -499,10 +597,26 @@ impl Media {
             .collect();
         location.push('\0' as i8);
 
+        #[cfg(feature = "vlc4")]
         let media_ptr = unsafe {
             let location = location.as_ptr();
             vlc::libvlc_media_new_location(location)
         };
+
+        #[cfg(not(feature = "vlc4"))]
+        let media_ptr = unsafe {
+            let mut instance_singleton: Gd<VLCInstance> = Engine::singleton()
+                .get_singleton("VLCInstance")
+                .expect("VLCInstance not found")
+                .cast();
+            let mut inst = instance_singleton.bind_mut();
+            
+            vlc::libvlc_media_new_location(
+                inst.get_vlc_instance(),
+                location.as_ptr(),
+            )
+        };
+
         Self { file, media_ptr }
     }
 
