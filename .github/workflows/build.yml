@@ -55,7 +55,20 @@ jobs:
                   cd ${{ github.workspace }}
                   pwsh -Command "./scripts/zip.ps1 ${{ matrix.platform }}"
                 
-
+            - name: Install VLC (Windows)
+              if: matrix.platform == 'windows'
+              run: |
+                $vlcVersion = "3.0.18"
+                $vlcUrl = "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/vlc-$vlcVersion-win64.zip"
+                $vlcZip = "$env:TEMP\vlc.zip"
+                $vlcDir = "$env:GITHUB_WORKSPACE\vlc"
+                
+                Invoke-WebRequest -Uri $vlcUrl -OutFile $vlcZip
+                Expand-Archive -Path $vlcZip -DestinationPath $vlcDir
+                
+                echo "VLC_LIB_DIR=$vlcDir\vlc-$vlcVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
+                echo "$vlcDir\vlc-$vlcVersion\SDK\lib" | Out-File -FilePath $env:GITHUB_PATH -Append
+                
             - name: Upload build artifact
               uses: actions/upload-artifact@v4
               with:
