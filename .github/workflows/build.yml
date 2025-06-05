@@ -3,107 +3,72 @@ name: Build GDExtension
 on:
     push:
     pull_request:
-        branches: [ master ]
+        branches: [master]
     workflow_dispatch:
-
-env:
-    CARGO_TERM_COLOR: always
-    GODOT_VERSION: "4.2.1"
 
 jobs:
     build:
-        name: Build for ${{ matrix.platform.name }}
-        runs-on: ${{ matrix.platform.os }}
         strategy:
-            fail-fast: false
             matrix:
-                platform:
-                    - name: Windows
-                      os: windows-latest
-                      target: x86_64-pc-windows-msvc
-                      lib_ext: dll
-                    - name: Linux
-                      os: ubuntu-latest
-                      target: x86_64-unknown-linux-gnu
-                      lib_ext: so
-                    - name: macOS
-                      os: macos-latest
-                      target: x86_64-apple-darwin
-                      lib_ext: dylib
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                include:
+                    - os: ubuntu-latest
+                      platform: linux
+                    - os: windows-latest
+                      platform: windows
+                    - os: macos-latest
+                      platform: macos
+
+        runs-on: ${{ matrix.os }}
 
         steps:
-            - name: Checkout repository
+            - name: Checkout code
               uses: actions/checkout@v3
               with:
                   submodules: recursive
 
-            - name: Install Rust
-              uses: dtolnay/rust-toolchain@stable
+            - name: Setup Rust
+              uses: actions-rs/toolchain@v1
               with:
-                  targets: ${{ matrix.platform.target }}
+                  profile: minimal
+                  toolchain: stable
+                  override: true
 
-            - name: Install Linux dependencies
-              if: matrix.platform.name == 'Linux'
+            - name: Build GDExtension
               run: |
-                  sudo apt-get update
-                  sudo apt-get install -y build-essential libclang-dev pkg-config
-
-            - name: Build library
-              run: |
-                  cargo build --release --target ${{ matrix.platform.target }}
-
-            - name: Create GDExtension output structure
+                  ./scripts/zip.sh ${{ matrix.platform }}
               shell: bash
-              run: |
-                  mkdir -p "addons/godot_vlc/bin/${{ matrix.platform.name }}"
-                  cp "target/${{ matrix.platform.target }}/release/libgodot_vlc.${{ matrix.platform.lib_ext }}" "addons/godot_vlc/bin/${{ matrix.platform.name }}/"
-                  
-                  # Make sure GDExtension json file exists in the addon folder
-                  if [ ! -f "addons/godot_vlc/godot_vlc.gdextension" ]; then
-                      mkdir -p addons/godot_vlc
-                      cat > addons/godot_vlc/godot_vlc.gdextension << EOF
-                  [configuration]
-                  entry_symbol = "gdext_rust_init"
-                  compatibility_minimum = 4.1
 
-                  [libraries]
-                  linux.x86_64 = "res://addons/godot_vlc/bin/Linux/libgodot_vlc.so"
-                  windows.x86_64 = "res://addons/godot_vlc/bin/Windows/libgodot_vlc.dll"
-                  macos.universal = "res://addons/godot_vlc/bin/macOS/libgodot_vlc.dylib"
-                  EOF
-                  fi
-
-            - name: Upload artifacts
+            - name: Upload build artifact
               uses: actions/upload-artifact@v3
               with:
-                  name: godot-vlc-${{ matrix.platform.name }}
-                  path: addons/godot_vlc/
+                  name: ${{ matrix.platform }}-build
+                  path: ./build/*.zip
 
-    package:
-        name: Package Extension
+    combine:
         needs: build
         runs-on: ubuntu-latest
         steps:
-            - name: Download all artifacts
+            - name: Download all build artifacts
               uses: actions/download-artifact@v3
               with:
-                  path: artifacts
+                  path: all-builds
 
-            - name: Create addon package
+            - name: Combine all builds into one zip
               run: |
-                  mkdir -p godot_vlc/addons/godot_vlc
-                  cp -r artifacts/godot-vlc-*/bin godot_vlc/addons/godot_vlc/
-                  cp artifacts/godot-vlc-*/*.gdextension godot_vlc/addons/godot_vlc/
-                  cd godot_vlc && zip -r ../godot_vlc.zip .
+                  mkdir -p combined
+                  find all-builds -name "*.zip" -exec unzip -o -d combined {} \;
+                  cd combined
+                  zip -r ../godot-vlc-all-platforms.zip .
 
-            - name: Upload packaged addon
+            - name: Upload combined artifact
               uses: actions/upload-artifact@v3
               with:
-                  name: godot_vlc_addon
-                  path: godot_vlc.zip
+                  name: godot-vlc-all-platforms
+                  path: godot-vlc-all-platforms.zip
 
-            - name: Create Release
+            - name: Create release if tagged
               if: startsWith(github.ref, 'refs/tags/')
               uses: softprops/action-gh-release@v1
               with:
-                  files: godot_vlc.zip
+                  files: godot-vlc-all-platforms.zip
