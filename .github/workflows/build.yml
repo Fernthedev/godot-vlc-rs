@@ -52,8 +52,9 @@ jobs:
 
             - name: Build GDExtension
               run: |
+                  cd ${{ github.workspace }}
                   pwsh -Command "./scripts/zip.ps1 ${{ matrix.platform }}"
-              shell: bash
+                
 
             - name: Upload build artifact
               uses: actions/upload-artifact@v4
@@ -61,6 +62,7 @@ jobs:
                   name: ${{ matrix.platform }}-build
                   path: ./build/*.zip
                   retention-days: 2
+                  if-no-files-found: error
 
     combine:
         needs: build
