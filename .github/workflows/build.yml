@@ -53,7 +53,7 @@ jobs:
             - name: Build GDExtension
               run: |
                   cd ${{ github.workspace }}
-                  pwsh -Command "./scripts/zip.ps1 ${{ matrix.platform }}"
+                  pwsh -Command "./scripts/zip.ps1"
             - name: Install VLC (Windows)
               if: matrix.platform == 'windows'
               run: |

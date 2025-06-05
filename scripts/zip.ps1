@@ -43,6 +43,10 @@ New-Item -Force -ItemType Directory -Path $pluginsDir | Out-Null
 $libFile = Get-LibraryFile -platform $platform -target $Target
 $srcLib = Join-Path $targetDir $libFile
 $dstLib = Join-Path $binDir $libFile
+Write-Host "Target $targetDir"
+Write-Host "Source library path: $srcLib"
+Write-Host "Destination library path: $dstLib"
+
 Copy-Item $srcLib -Destination $dstLib -Force
 
 # Copy VLC files (update paths if needed)
