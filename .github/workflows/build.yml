@@ -52,7 +52,7 @@ jobs:
 
             - name: Build GDExtension
               run: |
-                  ./scripts/zip.ps1 ${{ matrix.platform }}
+                  pwsh -Command "./scripts/zip.ps1 ${{ matrix.platform }}"
               shell: bash
 
             - name: Upload build artifact
@@ -60,6 +60,7 @@ jobs:
               with:
                   name: ${{ matrix.platform }}-build
                   path: ./build/*.zip
+                  retention-days: 2
 
     combine:
         needs: build
