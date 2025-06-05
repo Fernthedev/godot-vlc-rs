@@ -48,7 +48,7 @@ jobs:
               if: matrix.platform == 'linux'
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y libvlc-dev libvlccore-dev
+                  sudo apt-get install -y vlc libvlc-dev libvlccore-dev
 
             - name: Install VLC (Windows)
               if: matrix.platform == 'windows'
