@@ -34,6 +34,22 @@ jobs:
                   toolchain: stable
                   override: true
 
+            - name: Setup PowerShell
+              if: matrix.platform == 'macos'
+              run: |
+                  brew install --cask powershell
+
+            - name: Install VLC
+              if: matrix.platform == 'macos'
+              run: |
+                  brew install vlc
+
+            - name: Install VLC
+              if: matrix.platform == 'linux'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libvlc-dev libvlccore-dev
+
             - name: Build GDExtension
               run: |
                   ./scripts/zip.ps1 ${{ matrix.platform }}
