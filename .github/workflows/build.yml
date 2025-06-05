@@ -40,7 +40,7 @@ jobs:
               shell: bash
 
             - name: Upload build artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: ${{ matrix.platform }}-build
                   path: ./build/*.zip
@@ -50,7 +50,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Download all build artifacts
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   path: all-builds
 
@@ -62,7 +62,7 @@ jobs:
                   zip -r ../godot-vlc-all-platforms.zip .
 
             - name: Upload combined artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: godot-vlc-all-platforms
                   path: godot-vlc-all-platforms.zip
