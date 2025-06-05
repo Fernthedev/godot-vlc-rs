@@ -36,7 +36,7 @@ jobs:
 
             - name: Build GDExtension
               run: |
-                  ./scripts/zip.sh ${{ matrix.platform }}
+                  ./scripts/zip.ps1 ${{ matrix.platform }}
               shell: bash
 
             - name: Upload build artifact

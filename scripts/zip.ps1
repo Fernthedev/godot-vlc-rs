@@ -1,3 +1,4 @@
+#!/bin/pwsh
 param (
     [string]$ProjectRoot = ".",
     [string]$Target = "release"  # or "debug"
