@@ -54,7 +54,6 @@ jobs:
               run: |
                   cd ${{ github.workspace }}
                   pwsh -Command "./scripts/zip.ps1 ${{ matrix.platform }}"
-                
             - name: Install VLC (Windows)
               if: matrix.platform == 'windows'
               run: |
@@ -68,7 +67,8 @@ jobs:
                 
                 echo "VLC_LIB_DIR=$vlcDir\vlc-$vlcVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
                 echo "$vlcDir\vlc-$vlcVersion\SDK\lib" | Out-File -FilePath $env:GITHUB_PATH -Append
-                
+                echo "RUSTFLAGS=-C link-arg=Advapi32.lib" | Out-File -FilePath $env:GITHUB_ENV -Append
+
             - name: Upload build artifact
               uses: actions/upload-artifact@v4
               with:
