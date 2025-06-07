@@ -21,6 +21,17 @@ function Get-LibraryFile {
     }
 }
 
+function Get-PlatformDir {
+    param($platform)
+
+    switch ($platform) {
+        "windows" { return "win64" }
+        "linux"   { return "linux_x64" }
+        "macos"   { return "macos" }
+    }
+}
+
+
 # run cargo build -r
 $buildCommand = "cargo build --release"
 if ($Target -eq "debug") {
@@ -30,8 +41,9 @@ Write-Host "Running: $buildCommand"
 Invoke-Expression $buildCommand
 
 $platform = Get-Platform
+$platformDir = Get-PlatformDir -platform $platform 
 $targetSuffix = if ($Target -eq "debug") { "_debug" } else { "" }
-$binDir = Join-Path $ProjectRoot "demo/addons/godot-vlc/bin/$platform"
+$binDir = Join-Path $ProjectRoot "demo/addons/godot-vlc/bin/$platformDir"
 $pluginsDir = Join-Path $binDir "plugins"
 $targetDir = Join-Path $ProjectRoot "target/$Target"
 

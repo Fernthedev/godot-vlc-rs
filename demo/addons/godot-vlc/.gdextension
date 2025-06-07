@@ -7,8 +7,8 @@ reloadable = true
 windows.debug.x86_64 = "res://addons/godot-vlc/bin/win64/godot_vlc_debug.dll"
 windows.release.x86_64 = "res://addons/godot-vlc/bin/win64/godot_vlc.dll"
 
-linux.debug.x86_64 = "res://addons/godot-vlc/bin/linux/libgodot_vlc_debug.so"
-linux.release.x86_64 = "res://addons/godot-vlc/bin/linux/libgodot_vlc.so"
+linux.debug.x86_64 = "res://addons/godot-vlc/bin/linux_x64/libgodot_vlc_debug.so"
+linux.release.x86_64 = "res://addons/godot-vlc/bin/linux_x64/libgodot_vlc.so"
 
 macos.debug.universal = "res://addons/godot-vlc/bin/macos/libgodot_vlc_debug.dylib"
 macos.release.universal = "res://addons/godot-vlc/bin/macos/libgodot_vlc.dylib"
@@ -21,9 +21,9 @@ windows = {
 }
 
 linux = {
-	"res://addons/godot-vlc/bin/linux/libvlc.so": "",
-	"res://addons/godot-vlc/bin/linux/libvlccore.so": "",
-	"res://addons/godot-vlc/bin/linux/plugins/": ""
+	"res://addons/godot-vlc/bin/linux_x64/libvlc.so": "",
+	"res://addons/godot-vlc/bin/linux_x64/libvlccore.so": "",
+	"res://addons/godot-vlc/bin/linux_x64/plugins/": ""
 }
 
 macos = {
