@@ -99,11 +99,6 @@ $zipFilePath = Join-Path $ProjectRoot "target" $zipFileName
 if (Test-Path $zipFilePath) {
     Remove-Item $zipFilePath -Force
 }
-
-(Get-Item "demo/addons/godot-vlc/.gdextension").LastWriteTime = Get-Date
-(Get-Item "demo/addons/godot-vlc/.gdextension.uid").LastWriteTime = Get-Date
-
-# include hidden files
-Compress-Archive -Path (Get-ChildItem -Path "demo/addons" -Recurse -Force).FullName -DestinationPath $zipFilePath
-# Compress-Archive -Path demo/addons  -DestinationPath $zipFilePath
+# include hidden
+Compress-Archive -Path demo/addons demo/addons/.gdextension demo/addons/.gdextension.uid -DestinationPath $zipFilePath
 Write-Host "✅ Created zip file: $zipFilePath"
