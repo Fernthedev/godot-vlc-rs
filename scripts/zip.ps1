@@ -71,11 +71,13 @@ switch ($platform) {
         
     }
     "linux" {
-        $vlcRoot = "/usr/lib"  # or /usr/lib/x86_64-linux-gnu depending on distro
+        $vlcRoot = "/usr/lib/x86_64-linux-gnu/vlc"  # /usr/lib or /usr/lib/x86_64-linux-gnu depending on distro
         Copy-Item "$vlcRoot/libvlc.so*" -Destination $binDir -Force
         Copy-Item "$vlcRoot/libvlccore.so*" -Destination $binDir -Force
-        Copy-Item "/usr/lib/vlc/plugins/*" -Destination $pluginsDir -Recurse -Force
-        Copy-Item "/usr/lib/x86_64-linux-gnu/vlc/plugins/*" -Destination $pluginsDir -Recurse -Force
+        Copy-Item "$vlcRoot/plugins/*" -Destination $binDir -Force
+        
+        #Copy-Item "/usr/lib/vlc/plugins/*" -Destination $pluginsDir -Recurse -Force
+        #Copy-Item "/usr/lib/x86_64-linux-gnu/vlc/plugins/*" -Destination $pluginsDir -Recurse -Force
     }
     "macos" {
         $vlcRoot = "/Applications/VLC.app/Contents/MacOS/lib"
