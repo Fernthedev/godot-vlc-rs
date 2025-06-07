@@ -100,5 +100,5 @@ if (Test-Path $zipFilePath) {
     Remove-Item $zipFilePath -Force
 }
 # include hidden
-Compress-Archive -Path demo/addons demo/addons/.gdextension demo/addons/.gdextension.uid -DestinationPath $zipFilePath
+Compress-Archive -Path demo/addons/* -DestinationPath $zipFilePath
 Write-Host "✅ Created zip file: $zipFilePath"
