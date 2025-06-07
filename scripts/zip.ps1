@@ -99,5 +99,5 @@ $zipFilePath = Join-Path $ProjectRoot "target" $zipFileName
 if (Test-Path $zipFilePath) {
     Remove-Item $zipFilePath -Force
 }
-Compress-Archive -Path $binDir -DestinationPath $zipFilePath
+Compress-Archive -Path demo/addons  -DestinationPath $zipFilePath
 Write-Host "✅ Created zip file: $zipFilePath"
