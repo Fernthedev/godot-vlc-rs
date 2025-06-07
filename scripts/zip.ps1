@@ -99,6 +99,16 @@ $zipFilePath = Join-Path $ProjectRoot "target" $zipFileName
 if (Test-Path $zipFilePath) {
     Remove-Item $zipFilePath -Force
 }
+
+
+
+
 # include hidden
-Compress-Archive -Path demo/addons/* -DestinationPath $zipFilePath
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+[System.IO.Compression.ZipFile]::CreateFromDirectory(
+    "demo/addons",
+    "$zipFilePath"
+)
+# Compress-Archive -Path demo/addons/* -DestinationPath $zipFilePath
 Write-Host "✅ Created zip file: $zipFilePath"
