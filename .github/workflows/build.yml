@@ -49,6 +49,8 @@ jobs:
               run: |
                   sudo apt-get update
                   sudo apt-get install -y vlc vlc-bin vlc-data libvlc-dev libvlccore-dev libvlc-bin libvlc5 libvlccore9
+                  ls /usr/lib/x86_64-linux-gnu/libvlc.so
+                  ls /usr/lib/x86_64-linux-gnu/
 
             - name: Install VLC (Windows)
               if: matrix.platform == 'windows'
