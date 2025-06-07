@@ -62,7 +62,9 @@ jobs:
             
                 # Download and extract VLC
                 Invoke-WebRequest -Uri $vlcUrl -OutFile $vlcZip
-                Expand-Archive -Path $vlcZip -DestinationPath $vlcDir
+                Expand-Archive -Path $vlcZip -DestinationPath "$env:GITHUB_WORKSPACE\vlc"
+
+                Copy-Item -Path "$env:GITHUB_WORKSPACE\vlc" -Destination "$vlcDir" -Recurse -Force
 
                 # Set required environment variables
                 echo "VLC_LIB_DIR=$vlcExtracted" | Out-File -FilePath $env:GITHUB_ENV -Append
