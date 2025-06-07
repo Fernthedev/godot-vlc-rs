@@ -54,28 +54,23 @@ jobs:
               if: matrix.platform == 'windows'
               run: |
                 $vlcVersion = "3.0.20"
-                $vlcUrl = "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/vlc-$vlcVersion-win64.7z"
-                $vlc7z = "$env:TEMP\vlc.7z"
+                $vlcUrl = "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/vlc-$vlcVersion-win64.zip"
+                $vlcZip = "$env:TEMP\vlc.zip"
                 $vlcDir = "$env:GITHUB_WORKSPACE\vlc"
-                $vlcExtractedDir = "$vlcDir\vlc-$vlcVersion"
+                $vlcExtracted = "$vlcDir\vlc-$vlcVersion"
             
-                # Download VLC archive
-                Invoke-WebRequest -Uri $vlcUrl -OutFile $vlc7z
+                # Download and extract VLC
+                Invoke-WebRequest -Uri $vlcUrl -OutFile $vlcZip
+                Expand-Archive -Path $vlcZip -DestinationPath $vlcDir
             
-                # Install 7zip if missing
-                choco install 7zip -y
-            
-                # Extract VLC
-                7z x $vlc7z -o"$vlcDir"
-            
-                # Set env vars for libvlc-sys
-                echo "LIBVLC_LIB_DIR=$vlcExtractedDir" | Out-File -FilePath $env:GITHUB_ENV -Append
-                echo "LIBVLC_INCLUDE_DIR=$vlcExtractedDir\include" | Out-File -FilePath $env:GITHUB_ENV -Append
-                echo "LIBVLC_PLUGIN_PATH=$vlcExtractedDir\plugins" | Out-File -FilePath $env:GITHUB_ENV -Append
-                echo "LIB=$vlcExtractedDir" | Out-File -FilePath $env:GITHUB_ENV -Append
-                echo "$vlcExtractedDir" | Out-File -FilePath $env:GITHUB_PATH -Append
+                # Set required environment variables
+                echo "VLC_LIB_DIR=$vlcExtracted" | Out-File -FilePath $env:GITHUB_ENV -Append
+                echo "LIBVLC_LIB_DIR=$vlcExtracted" | Out-File -FilePath $env:GITHUB_ENV -Append
+                echo "LIBVLC_INCLUDE_DIR=$vlcExtracted\include" | Out-File -FilePath $env:GITHUB_ENV -Append
+                echo "LIBVLC_PLUGIN_PATH=$vlcExtracted\plugins" | Out-File -FilePath $env:GITHUB_ENV -Append
                 echo "LIBVLC_NO_PKG_CONFIG=1" | Out-File -FilePath $env:GITHUB_ENV -Append
                 echo "RUSTFLAGS=-C link-args=Advapi32.lib" | Out-File -FilePath $env:GITHUB_ENV -Append
+                echo "$vlcExtracted\SDK\lib" | Out-File -FilePath $env:GITHUB_PATH -Append
                 
             - name: Build GDExtension
               run: |
