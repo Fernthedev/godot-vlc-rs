@@ -56,6 +56,7 @@ switch ($platform) {
         Copy-Item "$vlcRoot\libvlc.dll" -Destination $binDir -Force
         Copy-Item "$vlcRoot\libvlccore.dll" -Destination $binDir -Force
         Copy-Item "$vlcRoot\plugins\*" -Destination $pluginsDir -Recurse -Force
+        
     }
     "linux" {
         $vlcRoot = "/usr/lib"  # or /usr/lib/x86_64-linux-gnu depending on distro
@@ -80,5 +81,5 @@ $zipFilePath = Join-Path $ProjectRoot "target" $zipFileName
 if (Test-Path $zipFilePath) {
     Remove-Item $zipFilePath -Force
 }
-Compress-Archive -Path $binDir, $pluginsDir -DestinationPath $zipFilePath
+Compress-Archive -Path $binDir -DestinationPath $zipFilePath
 Write-Host "✅ Created zip file: $zipFilePath"

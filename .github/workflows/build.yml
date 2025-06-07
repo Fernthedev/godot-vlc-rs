@@ -53,18 +53,27 @@ jobs:
             - name: Install VLC (Windows)
               if: matrix.platform == 'windows'
               run: |
-                $vlcVersion = "3.0.18"
-                $vlcUrl = "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/vlc-$vlcVersion-win64.zip"
-                $vlcZip = "$env:TEMP\vlc.zip"
+                $vlcVersion = "3.0.20"
+                $vlcUrl = "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/vlc-$vlcVersion-win64.7z"
+                $vlc7z = "$env:TEMP\vlc.7z"
                 $vlcDir = "$env:GITHUB_WORKSPACE\vlc"
-                
-                Invoke-WebRequest -Uri $vlcUrl -OutFile $vlcZip
-                Expand-Archive -Path $vlcZip -DestinationPath $vlcDir
-                
-                echo "VLC_LIB_DIR=$vlcDir\vlc-$vlcVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
-                echo "$vlcDir\vlc-$vlcVersion\SDK\lib" | Out-File -FilePath $env:GITHUB_PATH -Append
+            
+                Invoke-WebRequest -Uri $vlcUrl -OutFile $vlc7z
+            
+                # Install 7zip if needed
+                choco install 7zip -y
+            
+                # Extract using 7z
+                7z x $vlc7z -o"$vlcDir"
+            
+                $vlcExtractedDir = "$vlcDir\vlc-$vlcVersion"
+                $vlcPluginPath = "$vlcExtractedDir\plugins"
+            
+                echo "VLC_LIB_DIR=$vlcExtractedDir" | Out-File -FilePath $env:GITHUB_ENV -Append
+                echo "$vlcExtractedDir\SDK\lib" | Out-File -FilePath $env:GITHUB_PATH -Append
                 echo "RUSTFLAGS=-C link-arg=Advapi32.lib" | Out-File -FilePath $env:GITHUB_ENV -Append
-
+                echo "VLC_PLUGIN_PATH=$vlcPluginPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+                
             - name: Build GDExtension
               run: |
                   cd ${{ github.workspace }}
