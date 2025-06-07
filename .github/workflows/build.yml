@@ -57,14 +57,18 @@ jobs:
                 $vlcUrl = "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/vlc-$vlcVersion-win64.zip"
                 $vlcZip = "$env:TEMP\vlc.zip"
                 $vlcDir = "C:\Program Files\VideoLAN\VLC"
-                $vlcExtracted = "$vlcDir\vlc-$vlcVersion"
-                $vlcPluginPath = "$vlcExtracted\plugins"
-            
+                
                 # Download and extract VLC
                 Invoke-WebRequest -Uri $vlcUrl -OutFile $vlcZip
                 Expand-Archive -Path $vlcZip -DestinationPath "$env:GITHUB_WORKSPACE\vlc"
 
-                Copy-Item -Path "$env:GITHUB_WORKSPACE\vlc" -Destination "$vlcDir" -Recurse -Force
+                $vlcExtracted = "$env:GITHUB_WORKSPACE\vlc\vlc-$vlcVersion"
+
+                Copy-Item -Path "$vlcExtracted" -Destination "$vlcDir" -Recurse -Force
+
+                # Use new folder
+                $vlcExtracted = $vlcDir
+                $vlcPluginPath = "$vlcExtracted\plugins"
 
                 # Set required environment variables
                 echo "VLC_LIB_DIR=$vlcExtracted" | Out-File -FilePath $env:GITHUB_ENV -Append
