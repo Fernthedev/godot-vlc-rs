@@ -74,7 +74,7 @@ switch ($platform) {
         $vlcRoot = "/usr/lib/x86_64-linux-gnu/vlc"  # /usr/lib or /usr/lib/x86_64-linux-gnu depending on distro
         Copy-Item "$vlcRoot/libvlc.so*" -Destination $binDir -Force
         Copy-Item "$vlcRoot/libvlccore.so*" -Destination $binDir -Force
-        Copy-Item "$vlcRoot/plugins/*" -Destination pluginsDir -Force
+        Copy-Item "$vlcRoot/plugins/*" -Destination $pluginsDir -Force
 
         #Copy-Item "/usr/lib/vlc/plugins/*" -Destination $pluginsDir -Recurse -Force
         #Copy-Item "/usr/lib/x86_64-linux-gnu/vlc/plugins/*" -Destination $pluginsDir -Recurse -Force
