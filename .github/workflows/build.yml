@@ -75,7 +75,7 @@ jobs:
                 echo "LIB=$vlcExtractedDir" | Out-File -FilePath $env:GITHUB_ENV -Append
                 echo "$vlcExtractedDir" | Out-File -FilePath $env:GITHUB_PATH -Append
                 echo "LIBVLC_NO_PKG_CONFIG=1" | Out-File -FilePath $env:GITHUB_ENV -Append
-                
+                echo "RUSTFLAGS=-C link-args=Advapi32.lib" | Out-File -FilePath $env:GITHUB_ENV -Append
                 
             - name: Build GDExtension
               run: |
