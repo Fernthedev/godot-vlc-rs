@@ -31,11 +31,8 @@ function Get-PlatformDir {
 }
 
 
-# run cargo build -r
-Write-Host "Running: $buildCommand"
-Invoke-Expression cargo build
-Write-Host "Running: $buildCommand"
-Invoke-Expression cargo build --release
+cargo build
+cargo build --release
 
 $platform = Get-Platform
 $platformDir = Get-PlatformDir -platform $platform 
