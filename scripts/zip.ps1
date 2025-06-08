@@ -1,6 +1,6 @@
 #!/bin/pwsh
 param (
-    [string]$ProjectRoot = ".",
+    [string]$ProjectRoot = "."
 )
 
 function Get-Platform {
