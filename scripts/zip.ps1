@@ -1,7 +1,6 @@
 #!/bin/pwsh
 param (
     [string]$ProjectRoot = ".",
-    [string]$Target = "release"  # or "debug"
 )
 
 function Get-Platform {
@@ -12,7 +11,7 @@ function Get-Platform {
 }
 
 function Get-LibraryFile {
-    param($platform, $target)
+    param($platform, $targetSuffix)
 
     switch ($platform) {
         "windows" { return "godot_vlc$($targetSuffix).dll" }
@@ -33,33 +32,37 @@ function Get-PlatformDir {
 
 
 # run cargo build -r
-$buildCommand = "cargo build --release"
-if ($Target -eq "debug") {
-    $buildCommand = "cargo build --features debug"
-}
 Write-Host "Running: $buildCommand"
-Invoke-Expression $buildCommand
+Invoke-Expression cargo build
+Write-Host "Running: $buildCommand"
+Invoke-Expression cargo build --release
 
 $platform = Get-Platform
 $platformDir = Get-PlatformDir -platform $platform 
-$targetSuffix = if ($Target -eq "debug") { "_debug" } else { "" }
 $binDir = Join-Path $ProjectRoot "demo/addons/godot-vlc/bin/$platformDir"
 $pluginsDir = Join-Path $binDir "plugins"
-$targetDir = Join-Path $ProjectRoot "target/$Target"
+
+$debugDir = Join-Path $ProjectRoot "target/debug"
+$releaseDir = Join-Path $ProjectRoot "target/release"
 
 # Create output directory
 New-Item -Force -ItemType Directory -Path $binDir | Out-Null
 New-Item -Force -ItemType Directory -Path $pluginsDir | Out-Null
 
 # Copy GDExtension library
-$libFile = Get-LibraryFile -platform $platform -target $Target
-$srcLib = Join-Path $targetDir $libFile
-$dstLib = Join-Path $binDir $libFile
-Write-Host "Target $targetDir"
-Write-Host "Source library path: $srcLib"
-Write-Host "Destination library path: $dstLib"
+$libFile = Get-LibraryFile -platform $platform -targetSuffix ""
+$libDebugFile = Get-LibraryFile -platform $platform -target "_debug"
 
-Copy-Item $srcLib -Destination $dstLib -Force
+$srcReleaseLib = Join-Path $releaseDir $libFile
+$srcDebugLib = Join-Path $debugDir $libFile
+
+$dstReleaseLib = Join-Path $binDir $libFile
+$dstDebugLib = Join-Path $binDir $libDebugFile
+Write-Host "Source library path: $srcReleaseLib $srcDebugLib"
+Write-Host "Destination library path: $dstReleaseLib $dstDebugLib"
+
+Copy-Item $srcReleaseLib -Destination $dstReleaseLib -Force
+Copy-Item $srcDebugLib -Destination $dstDebugLib -Force
 
 # Copy VLC files (update paths if needed)
 switch ($platform) {
@@ -91,10 +94,10 @@ switch ($platform) {
     }
 }
 
-Write-Host "✅ GDExtension addon prepared for $platform in $Target mode."
+Write-Host "✅ GDExtension addon prepared for $platform in release mode."
 
 # now make a zip file
-$zipFileName = "godot-vlc-$platform-$Target.zip"
+$zipFileName = "godot-vlc-$platform-release.zip"
 $zipFilePath = Join-Path $ProjectRoot "target" $zipFileName
 if (Test-Path $zipFilePath) {
     Remove-Item $zipFilePath -Force
