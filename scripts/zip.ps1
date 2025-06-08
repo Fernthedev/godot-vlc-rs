@@ -69,6 +69,9 @@ switch ($platform) {
         Copy-Item "$vlcRoot\libvlccore.dll" -Destination $binDir -Force
         Copy-Item "$vlcRoot\plugins\*" -Destination $pluginsDir -Recurse -Force
         
+        #copy pdb
+        $pdbFile = Join-Path $binDir "godot_vlc_debug.pdb"
+        Copy-Item "$debugDir\godot_vlc.pdb" -Destination $pdbFile -Force
     }
     "linux" {
         $vlcRoot = "/usr/lib/x86_64-linux-gnu/vlc"  # /usr/lib or /usr/lib/x86_64-linux-gnu depending on distro
