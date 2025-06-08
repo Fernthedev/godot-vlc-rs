@@ -15,6 +15,26 @@ use std::ptr;
 use std::sync::Mutex;
 use std::thread::sleep;
 
+// https://github.com/videolan/vlc/blob/24a72c2840b2ae4f42649e4b6bce3631c3abcabd/include/vlc_fourcc.h#L692-L706
+// Rust equivalents of VLC codec constants
+pub mod vlc_codec {
+    pub const VLC_CODEC_S16N: &'static [u8; 4] = b"S16B";
+    pub const VLC_CODEC_U16N: &'static [u8; 4] = b"U16B";
+    pub const VLC_CODEC_S24N: &'static [u8; 4] = b"S24B";
+    pub const VLC_CODEC_U24N: &'static [u8; 4] = b"U24B";
+    pub const VLC_CODEC_S32N: &'static [u8; 4] = b"S32B";
+    pub const VLC_CODEC_U32N: &'static [u8; 4] = b"U32B";
+    pub const VLC_CODEC_FL32: &'static [u8; 4] = b"F32B";
+    pub const VLC_CODEC_FL64: &'static [u8; 4] = b"F64B";
+
+    pub const VLC_CODEC_S16I: &'static [u8; 4] = b"S16L";
+    pub const VLC_CODEC_U16I: &'static [u8; 4] = b"U16L";
+    pub const VLC_CODEC_S24I: &'static [u8; 4] = b"S24L";
+    pub const VLC_CODEC_U24I: &'static [u8; 4] = b"U24L";
+    pub const VLC_CODEC_S32I: &'static [u8; 4] = b"S32L";
+    pub const VLC_CODEC_U32I: &'static [u8; 4] = b"U32L";
+}
+
 enum MediaType {
     File,
     Location,
@@ -103,7 +123,7 @@ impl IVideoStreamPlayback for VideoStreamVLCPlayback {
         unsafe {
             vlc::libvlc_media_player_play(self.player);
         }
-
+        // Wait a bit to ensure the player is ready
         loop {
             sleep(time::Duration::from_millis(10));
             if unsafe { vlc::libvlc_media_player_is_playing(self.player) != 0 } {
@@ -207,6 +227,8 @@ impl IVideoStreamPlayback for VideoStreamVLCPlayback {
         let texture = unsafe { self.texture.as_ref()? };
         Some(texture.clone().upcast())
     }
+
+    /// Handles the audio playback and playing state.
     fn update(&mut self, _delta: f64) {
         #[cfg(feature = "vlc4")]
         {
@@ -530,7 +552,15 @@ impl VideoStreamVLCPlayback {
             .unwrap()
             .get_mut()
             .unwrap();
-        slice::from_raw_parts_mut(format, 4).copy_from_slice(b"FL32".map(|x| x as i8).as_slice());
+        #[cfg(not(feature = "vlc4"))]
+        {
+            slice::from_raw_parts_mut(format, 4).copy_from_slice(vlc_codec::VLC_CODEC_FL32.map(|x| x as i8).as_slice());
+
+        }
+        #[cfg(feature = "vlc4")]
+        {
+            slice::from_raw_parts_mut(format, 4).copy_from_slice(b"FL32".map(|x| x as i8).as_slice());
+        }
         audio_data.rate = *rate as i32;
         audio_data.channels = *channels as i32;
         audio_data.buffer.clear();

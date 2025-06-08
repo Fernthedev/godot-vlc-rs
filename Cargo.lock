@@ -13,9 +13,9 @@ dependencies = [
 
 [[package]]
 name = "bindgen"
-version = "0.71.1"
+version = "0.72.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f58bf3d7db68cfbac37cfc485a8d711e87e064c3d0fe0435b92f7a407f9d6b3"
+checksum = "4f72209734318d0b619a5e0f5129918b848c416e122a3c4ce054e03cb87b726f"
 dependencies = [
  "bitflags",
  "cexpr",
@@ -39,15 +39,15 @@ checksum = "1b8e56985ec62d17e9c1001dc89c88ecd7dc08e47eba5ec7c29c7b5eeecde967"
 
 [[package]]
 name = "bumpalo"
-version = "3.17.0"
+version = "3.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1628fb46dfa0b37568d12e5edd512553eccf6a22a78e8bde00bb4aed84d5bdbf"
+checksum = "793db76d6187cd04dff33004d8e6c9cc4e05cd330500379d2394209271b4aeee"
 
 [[package]]
 name = "cc"
-version = "1.2.25"
+version = "1.2.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0fc897dc1e865cc67c0e05a836d9d3f1df3cbe442aa4a9473b18e12624a4951"
+checksum = "956a5e21988b87f372569b66183b78babf23ebc2e744b733e4350a752c4dafac"
 dependencies = [
  "shlex",
 ]
@@ -264,7 +264,7 @@ dependencies = [
 [[package]]
 name = "libvlc-sys"
 version = "0.2.1"
-source = "git+https://github.com/Fernthedev/vlc-rs2.git#2e58ce29ce46eac1e710ba956adaf693395478d8"
+source = "git+https://github.com/Fernthedev/vlc-rs2.git#b4cf84901221fb6c5adb8395dbee6d27bcfbe8b5"
 dependencies = [
  "libc",
  "pkg-config",
@@ -464,7 +464,7 @@ dependencies = [
 [[package]]
 name = "vlc-rs2"
 version = "0.4.0"
-source = "git+https://github.com/Fernthedev/vlc-rs2.git#2e58ce29ce46eac1e710ba956adaf693395478d8"
+source = "git+https://github.com/Fernthedev/vlc-rs2.git#b4cf84901221fb6c5adb8395dbee6d27bcfbe8b5"
 dependencies = [
  "libc",
  "libvlc-sys",
