@@ -43,6 +43,8 @@ jobs:
               if: matrix.platform == 'macos'
               run: |
                   brew install vlc@nightly
+                  ls /Applications/VLC.app/Contents/
+                  ls /Applications/VLC.app/Contents/MacOS
 
             - name: Install VLC
               if: matrix.platform == 'linux'
