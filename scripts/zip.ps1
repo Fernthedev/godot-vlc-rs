@@ -91,6 +91,14 @@ switch ($platform) {
         Copy-Item "$vlcRoot/libvlc.dylib" -Destination $binDir -Force
         Copy-Item "$vlcRoot/libvlccore.dylib" -Destination $binDir -Force
         Copy-Item "/Applications/VLC.app/Contents/MacOS/plugins/*" -Destination $pluginsDir -Recurse -Force
+
+        # Use VLC_PATH environment variable for macOS
+        Copy-Item "$ENV:VLC_PATH/bin/*" -Destination $binDir -Force
+        Copy-Item "$ENV:VLC_PATH/lib/*" -Destination $binDir -Force
+        
+        # delete /lib/vlc/plugins
+        Remove-Item "$ENV:VLC_PATH/lib/vlc/plugins" -Recurse -Force -ErrorAction SilentlyContinue
+        Copy-Item "$ENV:VLC_PATH/lib/vlc/plugins/*" -Destination $pluginsDir -Recurse -Force
     }
 }
 
