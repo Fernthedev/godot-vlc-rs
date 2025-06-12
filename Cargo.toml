@@ -10,7 +10,11 @@ crate-type = ["cdylib"]
 [dependencies]
 godot = { version = "0.2.4", features = ["experimental-threads", "api-4-1"] }
 # vlc-rs = { version = "0.3.0" }
-vlc-rs2 = { git = "https://github.com/Fernthedev/vlc-rs2.git" }
+vlc-rs2 = { git = "https://github.com/Fernthedev/vlc-rs2.git", features = [
+    "runtime",
+    "bindgen",
+    "pkg_config"
+], package = "libvlc-sys" }
 printf = "0.1.0"
 cfg-if = "1.0.0"
 
@@ -18,6 +22,6 @@ cfg-if = "1.0.0"
 bindgen = "0.72.0"
 
 [features]
-# we use vlc 3 by default
-default = []
+# we use vlc 4 by default
+default = ["vlc4"]
 vlc4 = []

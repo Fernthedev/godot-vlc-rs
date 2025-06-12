@@ -42,11 +42,12 @@ jobs:
             - name: Install VLC
               if: matrix.platform == 'macos'
               run: |
-                  brew install vlc
+                  brew install vlc@nightly
 
             - name: Install VLC
               if: matrix.platform == 'linux'
               run: |
+                  sudo add-apt-repository ppa:videolan/master-daily
                   sudo apt-get update
                   sudo apt-get install -y vlc vlc-bin vlc-data libvlc-dev libvlccore-dev libvlc-bin libvlc5 libvlccore9
                   ls /usr/lib/x86_64-linux-gnu/libvlc.so
@@ -56,13 +57,26 @@ jobs:
               if: matrix.platform == 'windows'
               run: |
                 $vlcVersion = "3.0.20"
-                $vlcUrl = "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/vlc-$vlcVersion-win64.zip"
+                vlcUrl = "https://artifacts.videolan.org/vlc/nightly-win64-llvm/20250612-0433/vlc-4.0.0-dev-win64-52ed2542.7z"
+                # $vlcUrl = "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/vlc-$vlcVersion-win64.zip"
                 $vlcZip = "$env:TEMP\vlc.zip"
                 $vlcDir = "C:\Program Files\VideoLAN\VLC"
 
                 # Download and extract VLC
                 Invoke-WebRequest -Uri $vlcUrl -OutFile $vlcZip
-                Expand-Archive -Path $vlcZip -DestinationPath "$env:GITHUB_WORKSPACE\vlc"
+                # Install 7-Zip if not present
+                if (-not (Test-Path "C:\Program Files\7-Zip\7z.exe")) {
+                  $7zipUrl = "https://www.7-zip.org/a/7z2301-x64.exe"
+                  $7zipInstaller = "$env:TEMP\7z-installer.exe"
+                  Invoke-WebRequest -Uri $7zipUrl -OutFile $7zipInstaller
+                  Start-Process -FilePath $7zipInstaller -Args "/S" -Wait
+                }
+
+                # Extract VLC using 7-Zip
+                & "C:\Program Files\7-Zip\7z.exe" x $vlcZip -o"$env:GITHUB_WORKSPACE\vlc" -y
+
+                # Not for zip
+                # Expand-Archive -Path $vlcZip -DestinationPath "$env:GITHUB_WORKSPACE\vlc"
 
                 $vlcExtracted = "$env:GITHUB_WORKSPACE\vlc\vlc-$vlcVersion"
 

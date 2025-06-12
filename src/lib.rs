@@ -2,8 +2,7 @@
 #![feature(stmt_expr_attributes)]
 use godot::{classes::Engine, prelude::*};
 
-pub use vlc::sys as vlc;
-
+pub use vlc_rs2 as vlc;
 
 mod vlc_instance;
 mod video_stream_vlc;
