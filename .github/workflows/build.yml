@@ -39,24 +39,26 @@ jobs:
               run: |
                   brew install --cask powershell
 
-            - name: Install VLC
+            - name: Install VLC (MacOS)
               if: matrix.platform == 'macos'
               run: |
-                  # brew install vlc@nightly
+                  # for plugins
+                  brew install vlc@nightly
                   # ls /Applications/VLC.app/Contents/
                   # ls /Applications/VLC.app/Contents/MacOS
+                  
                   # Download and extract VLC for macOS ARM64
                   curl -L https://artifacts.videolan.org/vlc/nightly-macos-arm64/20250612-0413/vlc-macos-sdk-4.0.0-dev-arm64-52ed2542.tar.gz -o vlc.tar.gz
                   mkdir -p vlc-extracted
                   tar -xzf vlc.tar.gz -C vlc-extracted
+
                   # Set environment variable to the extracted folder
                   echo "VLC_PATH=${{ github.workspace }}/vlc-extracted" >> $GITHUB_ENV
+
                   # Make sure the SDK is available in the extracted location
                   ls -la vlc-extracted
 
-
-
-            - name: Install VLC
+            - name: Install VLC (Ubuntu)
               if: matrix.platform == 'linux'
               run: |
                   sudo add-apt-repository ppa:videolan/master-daily
