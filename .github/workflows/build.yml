@@ -56,7 +56,7 @@ jobs:
             - name: Install VLC (Windows)
               if: matrix.platform == 'windows'
               run: |
-                $vlcVersion = "3.0.20"
+                $vlcVersion = "4.0.0-dev"
                 $vlcUrl = "https://artifacts.videolan.org/vlc/nightly-win64-llvm/20250612-0433/vlc-4.0.0-dev-win64-52ed2542.7z"
                 # $vlcUrl = "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/vlc-$vlcVersion-win64.zip"
                 $vlcZip = "$env:TEMP\vlc.zip"
