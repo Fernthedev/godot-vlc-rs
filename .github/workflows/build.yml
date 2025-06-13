@@ -44,8 +44,10 @@ jobs:
               run: |
                   # for plugins
                   brew install vlc@nightly
-                  # ls /Applications/VLC.app/Contents/
-                  # ls /Applications/VLC.app/Contents/MacOS
+                  ls /Applications/VLC.app/Contents/
+                  ls /Applications/VLC.app/Contents/MacOS
+                  ls -la /Applications/VLC.app/Contents/Frameworks/plugins
+
                   
                   # Download and extract VLC for macOS ARM64
                   curl -L https://artifacts.videolan.org/vlc/nightly-macos-arm64/20250612-0413/vlc-macos-sdk-4.0.0-dev-arm64-52ed2542.tar.gz -o vlc.tar.gz
