@@ -98,8 +98,12 @@ switch ($platform) {
         # delete $binDir/plugins
         Remove-Item -Path $pluginsDir -Recurse -Force -ErrorAction SilentlyContinue
         
-        Copy-Item "/Applications/VLC.app/Contents/MacOS/plugins/*" -Destination $pluginsDir -Recurse -Force
-        Copy-Item "/Applications/VLC.app/Contents/Frameworks/plugins/*" -Destination $pluginsDir -Recurse -Force
+        if (Test-Path "/Applications/VLC.app/Contents/MacOS/plugins") {
+            Copy-Item "/Applications/VLC.app/Contents/MacOS/plugins/*" -Destination $pluginsDir -Recurse -Force
+        }
+        if (Test-Path "/Applications/VLC.app/Contents/Frameworks/plugins") {
+            Copy-Item "/Applications/VLC.app/Contents/Frameworks/plugins/*" -Destination $pluginsDir -Recurse -Force
+        }
     }
 }
 
